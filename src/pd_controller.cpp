@@ -59,8 +59,8 @@
                 "joint_states", 1, std::bind(&DynamicsCancellationNode::joint_states_callback, this, std::placeholders::_1));
 
             // Create subscription to joint_accelerations
-            subscription_desired_joint_accelerations_ = this->create_subscription<std_msgs::msg::Float64MultiArray>(
-                "desired_joint_accelerations", 1, std::bind(&DynamicsCancellationNode::desired_joint_accelerations_callback, this, std::placeholders::_1));
+            //subscription_desired_joint_accelerations_ = this->create_subscription<std_msgs::msg::Float64MultiArray>(
+                //"desired_joint_accelerations", 1, std::bind(&DynamicsCancellationNode::desired_joint_accelerations_callback, this, std::placeholders::_1));
 
             // Create publishers for joint acceleration
             publisher_joint_accel_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("desired_joint_accelerations", 1);
@@ -100,24 +100,24 @@
         }
 
         // joint_states subscription callback - when a msg arrives, updates desired_joint_accelerations_
-        void desired_joint_accelerations_callback(const std_msgs::msg::Float64MultiArray::SharedPtr msg)
+        /*void desired_joint_accelerations_callback(const std_msgs::msg::Float64MultiArray::SharedPtr msg)
         {
             desired_joint_accelerations_ = Eigen::VectorXd::Map(msg->data.data(), msg->data.size());
-        }
+        }*/
 
         // Method to calculate joint acceleration
-        Eigen::VectorXd cancel_dynamics()
+        Eigen::Vector2d cancel_dynamics()
         {
             // Calculate KD and KP
-            Eigen::MatrixXd KD(2, 2);
-            KD << 1000, 0,
-                0, 500;
+            Eigen::Matrix2d KD(2, 2);
+            KD << 25, 0,
+                0, 25;
 
-            Eigen::MatrixXd KP(2, 2);
-            KP << 8000, 0,
-                0, 3000;
+            Eigen::Matrix2d KP(2, 2);
+            KP << 100, 0,
+                0, 100;
 
-            Eigen::VectorXd qddot_desired = desired_joint_accelerations_ - KD * joint_velocities_ - KP * joint_positions_;
+            Eigen::Vector2d qddot_desired = - KD * joint_velocities_ - KP * joint_positions_;
             return qddot_desired;
         }
 
