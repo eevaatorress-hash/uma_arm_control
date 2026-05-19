@@ -117,7 +117,10 @@
             KP << 100, 0,
                 0, 100;
 
-            Eigen::Vector2d qddot_desired = - KD * joint_velocities_ - KP * joint_positions_;
+            Eigen::Vector2d q_ref;
+                q_ref << 0.0, 0.0;
+
+            Eigen::Vector2d qddot_desired = - KD * joint_velocities_ + KP * ( q_ref  - joint_positions_);
             return qddot_desired;
         }
 
