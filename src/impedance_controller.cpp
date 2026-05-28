@@ -274,16 +274,20 @@
             // Placeholder for impedance controller calculation
             Eigen::VectorXd x_dot_d = Eigen::VectorXd::Zero(2); // We assume desired cartesian velocity = 0
 
+
             // Calculate Cartesian errors
-            Eigen::VectorXd x_error;
-            x_error << joint_positions_(0) -0.785398,joint_positions_(1) + 0.785398; // revisar deseada
-            Eigen::VectorXd x_dot_error;
-            x_dot_error << joint_velocities_(0), joint_velocities_(1);
+            Eigen::VectorXd x_error(2);
+            cartesian_pose_ = forward_kinematics();
+            x_error = cartesian_pose_ - equilibrium_pose_; // revisar deseada
+
+            Eigen::VectorXd x_dot_error(2);
+            x_dot_error = cartesian_velocities_;
 
             // Replace with actual impedance controller equation: x'' = M^(-1)[F_ext - k x_error - B x'_error]
             Eigen::VectorXd x_ddot(2);
             x_ddot = mass_matrix_.inverse() * (-damping_matrix_*x_dot_error - stiffness_matrix_ * x_error + external_wrenches_ );
 
+            
             return x_ddot;
         }
 
