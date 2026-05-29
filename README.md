@@ -205,3 +205,220 @@ Para entender más aún los efectos de los distintos elementos necesarios para l
 - Aumento de la gravedad. Aumentan las fuerzas gravitacionales que actúan sobre el manipulador, generando una respuesta dinámica similar al caso de aumento de masas.
 
 ![Resultados del Lab2 al cambiar la gravedad](/images/Resultados_cambio_gravedad.png)
+
+# Lab 3
+
+## Fundamento teórico
+
+## Aplicación práctica
+
+## Resultados
+
+# Lab 4
+En esta práctica se implementará en el paquete de `uma_arm_control`, el siguiente esquema del controlador de impedancia.
+
+![Esquema modelo con controlador de impedancia](/images/Esquema_modelo.png)
+
+## Fundamento teórico
+Este controlador permite al manipulador ajustar su fuerza y movimiento al interactuar con el entorno en vez de mantener una posición rígida.
+Como tal la compensación a nivel articular la realiza el nodo diseñado en el laboratorio anterior, `dynamics_cancellation`, por eso en este nodo se pasarán esas variables del espacio operacional al cartesiano.
+
+Se irán realizando los siguientes procedimientos:
+- Obtener la posición cartesiana a partir de la articular.
+$$
+\mathbf{x} =
+\begin{bmatrix}
+l_1 \cos(q_1) + l_2 \cos(q_1 + q_2) \\
+l_1 \sin(q_1) + l_2 \sin(q_1 + q_2)
+\end{bmatrix}
+$$
+
+- Obtener los jacobianos para poder obtener la relación entre movimientos articulares y datos cartesianos. La derivada del jacobiano permitirá corregir el error en el movimiento.
+$$
+J(\mathbf{q}) =
+\begin{bmatrix}
+-l_1\sin(q_1) - l_2\sin(q_1+q_2) & -l_2\sin(q_1+q_2) \\
+l_1\cos(q_1) + l_2\cos(q_1+q_2) & l_2\cos(q_1+q_2)
+\end{bmatrix}
+$$
+
+$$
+\dot{J}(\mathbf{q},\dot{\mathbf{q}}) =
+\begin{bmatrix}
+-l_1\cos(q_1)\dot{q}_1 - l_2\cos(q_1+q_2)\dot{q}_1 &
+-l_2\cos(q_1+q_2)\dot{q}_2 \\
+-l_1\sin(q_1)\dot{q}_1 - l_2\sin(q_1+q_2)\dot{q}_1 &
+-l_2\sin(q_1+q_2)\dot{q}_2
+\end{bmatrix}
+$$
+
+- Obtener las velocidades cartesianas.
+$$
+\dot{\mathbf{x}} = \mathbf{J(q)} \dot{\mathbf{q}}
+$$
+
+- Obtener las aceleraciones cartesianas deseadas.
+$$
+M\ddot{\tilde{x}} + B\dot{\tilde{x}} + K\tilde{x} = f_{ext}
+$$
+
+$$
+\ddot{x}_d = M^{-1}\left(-B\dot{\tilde{x}} - K\tilde{x} + f_{ext}\right)
+$$
+
+$$
+\tilde{x} = x - x_d
+$$
+
+$$
+\dot{\tilde{x}} = \dot{x} - \dot{x}_d
+$$
+
+- Obtener las aceleraciones deseadas articulares.
+$$
+\ddot{x} = J(q)\ddot{q} + \dot{J}(q,\dot{q})\dot{q}
+$$
+
+$$
+\ddot{q} = J(q)^{-1} \left[ \ddot{x} - \dot{J}(q,\dot{q})\dot{q} \right]
+$$
+
+## Aplicación práctica
+Para aplicar las ecuaciones vistas en el fundamento teórico de esta práctica se irán diseñando las siguientes funciones:
+
+- Para la posición cartesiana, `forward_kinematics()`.
+
+~~~
+Eigen::VectorXd forward_kinematics()
+    {
+        // Placeholder for forward kinematics x = [l1 * cos(q1) + l2 * cos(q1 + q2), l1 * sin(q1) + l2 * sin(q1 + q2)]
+        // Initialize q1, q2, q_dot1 and q_dot2
+        double q1 = joint_positions_(0);
+        double q2 = joint_positions_(1);
+
+        Eigen::VectorXd x(2);
+        x << l1_*cos(q1) + l2_*cos(q1 + q2), l1_*sin(q1) + l2_ * sin(q1 + q2);
+
+        return x;
+    }
+~~~
+
+- Para los Jacobianos, `update_jacobians()`.
+~~~
+void update_jacobians()
+    {
+        // Placeholder for jacobian and jacobian_derivative matrices
+        // Initialize q1, q2, q_dot1 and q_dot2
+        double q1 = joint_positions_(0);
+        double q2 = joint_positions_(1);
+        double q_dot1 = joint_velocities_(0);
+        double q_dot2 = joint_velocities_(1);
+
+        // Calculate J(q)
+        jacobian_ <<-l1_ * sin(q1) - l2_ * sin(q1 + q2), -l2_ * sin(q1 + q2),
+        l1_ * cos(q1) + l2_ * cos(q1 + q2), l2_ * cos(q1 + q2);
+
+        // Calculate J'(q,q')
+        jacobian_derivative_ << -l1_*cos(q1)*q_dot1 - l2_*cos(q1 + q2)*q_dot1, -l2_*cos(q1+q2)*q_dot2,
+        -l1_*sin(q1)*q_dot1 - l2_*sin(q1 + q2)*q_dot1, -l2_*sin(q1+q2)*q_dot2;
+
+        RCLCPP_INFO(this->get_logger(), "Jacobian:\n[%.3f, %.3f]\n[%.3f, %.3f]",
+                jacobian_(0, 0), jacobian_(0, 1),
+                jacobian_(1, 0), jacobian_(1, 1));
+
+        double det = jacobian_.determinant();
+        RCLCPP_INFO(this->get_logger(), "Jacobian determinant: %.6f", det);
+        }
+~~~
+
+- Para las velocidades cartesianas, `differential_kinematics()`.
+~~~
+Eigen::MatrixXd differential_kinematics()
+    {
+        // Placeholder for first-order differential kinematics
+
+        Eigen::VectorXd x_dot(2);
+        x_dot = jacobian_ * joint_velocities_;
+
+        return x_dot;
+    }
+~~~
+
+- Para las aceleraciones cartesianas deseadas, `impedance_controller()`.
+~~~
+Eigen::VectorXd impedance_controller()
+    {
+        // Placeholder for impedance controller calculation
+        Eigen::VectorXd x_dot_d = Eigen::VectorXd::Zero(2); // We assume desired cartesian velocity = 0
+
+
+        // Calculate Cartesian errors
+        Eigen::VectorXd x_error(2);
+        cartesian_pose_ = forward_kinematics();
+        x_error = cartesian_pose_ - equilibrium_pose_; 
+
+        Eigen::VectorXd x_dot_error(2);
+        x_dot_error = cartesian_velocities_;
+
+        // Replace with actual impedance controller equation: x'' = M^(-1)[F_ext - k x_error - B x'_error]
+        Eigen::VectorXd x_ddot(2);
+        x_ddot = mass_matrix_.inverse() * (-damping_matrix_*x_dot_error - stiffness_matrix_ * x_error + external_wrenches_ );
+
+            
+            return x_ddot;
+        }
+~~~
+
+- Para las aceleraciones deseadas articulares, 
+~~~
+Eigen::VectorXd calculate_desired_joint_accelerations()
+    {
+        // Placeholder for the second-order differential kinematics
+        // q'' = J(q)^(-1)[x'' - J'(q,q')q']
+
+        RCLCPP_INFO(this->get_logger(), "x_ddot: [%.3f, %.3f]",
+            desired_cartesian_accelerations_(0), desired_cartesian_accelerations_(1));
+            
+
+        Eigen::VectorXd q_ddot;
+        q_ddot = jacobian_.inverse() * (desired_cartesian_accelerations_ - jacobian_derivative_ * joint_velocities_); //cuidado con lo de xddot
+
+        return q_ddot;
+    }
+~~~
+
+Además de este controlador, se añadirá un nodo (`equilibrium_pose_publisher.py`) que nos permita cambiar la posición de equilibrio del manipulador.
+
+## Resultados
+Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales: `ros2 launch uma_arm_description uma_arm_visualization.launch.py`, `ros2 launch uma_arm_control impedance_controller_launch.py`, `ros2 launch uma_arm_control dynamics_cancellation_external_forces_launch.py`, `ros2 launch uma_arm_control uma_arm_dynamics_launch.py` y `python3 wrench_trackbar_publisher.py`.
+
+Mandando fuerzas externas sobre el eje y se obtiene:
+![Respuesta del manipulador ante fuerzas externas sobre el eje y](/images/Respuesta_ejey.png)
+
+Si se aumentasen los valores de las matrices utilizadas para esta práctica, utilizando el mismo experimento con el que se obtuvo la figura anterior, se alcanzan los siguientes resultados:
+
+- Cambios sobre la matriz de masas (M). Presenta una respuesta más lenta ante fuerzas externas, ya que para la misma fuerza se generan aceleraciones menores.
+
+![Respuesta del manipulador ante cambios en M](/images/Respuesta_cambioM.png)
+
+- Cambios sobre la matriz de coeficientes de fricción viscosa (B). Incrementa la disipación de energía del sistema, reduciendo oscilaciones y mejorando la estabilidad.
+
+![Respuesta del manipulador ante cambios en B](/images/Respuesta_cambioB.png)
+
+- Cambios sobre la matriz de rigidez (K). El robot se resiste más al desplazamiento respecto a su podición de equilibrio.
+
+![Respuesta del manipulador ante cambios en K](/images/Respuesta_cambioK.png)
+
+Se puede concluir que, si en el eje X la impedancia fuese grande, el movimiento  sería más rígido, preciso y resistente a perturbaciones en esa dirección. Por el contrario, si en el eje Y la impedancia fuese pequeña, el comportamiento en esa dirección sería más flexible y fácil de perturbar permitiendo mayores desplazamientos ante la aplicación de fuerzas externas.
+
+No obstante, la aplicación de fuerzas en un eje no produce efectos solo en el, sino que también perturba al otro como se observa en la siguiente figura. Esto se debe a la transformación entre cartesiano y articular mediante a los jacobianos no preserva la independencia entre los ejes cartesianos, cada articulación contribuye simultáneamente a ambos ejes. Para evitar estas secuelas se podrían aumentar los coeficientes de fricción y de rígidez para intentar que el robot resista mejor a movimientos indeseados.
+
+![Respuesta del manipulador ante esfuerzos en X e Y](/images/Fuerza_x_y.png)
+
+Por último, se observan los efectos de cambios en la posición de equilibrio. Para poder modificar esta posición se lanza la siguiente terminal `python3 equilibrium_pose_publisher.py`.
+
+Ante cambios pequeños en la posición de equilibrio, el robot se aproximará a la nueva posición sin problema. Sin embargo, si cambiamos esta posición a regiones fuera de la zona de trabajo del robot este dejará de responder.
+
+![Respuesta del manipulador ante cambios en posición de equilibrio](/images/Equilibrio.png)
+
+![Respuesta del manipulador ante cambios en posición de equilibrio](/images/Equilibrio2.png)

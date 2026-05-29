@@ -278,7 +278,7 @@
             // Calculate Cartesian errors
             Eigen::VectorXd x_error(2);
             cartesian_pose_ = forward_kinematics();
-            x_error = cartesian_pose_ - equilibrium_pose_; // revisar deseada
+            x_error = cartesian_pose_ - equilibrium_pose_; 
 
             Eigen::VectorXd x_dot_error(2);
             x_dot_error = cartesian_velocities_;
