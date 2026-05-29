@@ -225,6 +225,7 @@ Como tal la compensación a nivel articular la realiza el nodo diseñado en el l
 
 Se irán realizando los siguientes procedimientos:
 - Obtener la posición cartesiana a partir de la articular.
+
 $$
 \mathbf{x} =
 \begin{bmatrix}
@@ -234,8 +235,9 @@ l_1 \sin(q_1) + l_2 \sin(q_1 + q_2)
 $$
 
 - Obtener los jacobianos para poder obtener la relación entre movimientos articulares y datos cartesianos. La derivada del jacobiano permitirá corregir el error en el movimiento.
+
 $$
-J(\mathbf{q}) =
+\mathbf{J(q)} =
 \begin{bmatrix}
 -l_1\sin(q_1) - l_2\sin(q_1+q_2) & -l_2\sin(q_1+q_2) \\
 l_1\cos(q_1) + l_2\cos(q_1+q_2) & l_2\cos(q_1+q_2)
@@ -243,7 +245,7 @@ l_1\cos(q_1) + l_2\cos(q_1+q_2) & l_2\cos(q_1+q_2)
 $$
 
 $$
-\dot{J}(\mathbf{q},\dot{\mathbf{q}}) =
+\mathbf{\dot{J}}(\mathbf{q},\dot{\mathbf{q}}) =
 \begin{bmatrix}
 -l_1\cos(q_1)\dot{q}_1 - l_2\cos(q_1+q_2)\dot{q}_1 &
 -l_2\cos(q_1+q_2)\dot{q}_2 \\
@@ -253,34 +255,37 @@ $$
 $$
 
 - Obtener las velocidades cartesianas.
+  
 $$
 \dot{\mathbf{x}} = \mathbf{J(q)} \dot{\mathbf{q}}
 $$
 
 - Obtener las aceleraciones cartesianas deseadas.
+
 $$
-M\ddot{\tilde{x}} + B\dot{\tilde{x}} + K\tilde{x} = f_{ext}
+\mathbf{M}\ddot{\tilde{\mathbf{x}}} + \mathbf{B}\dot{\tilde{\mathbf{x}}} + \mathbf{K}\tilde{\mathbf{x}} = \mathbf{f}_{ext}
 $$
 
 $$
-\ddot{x}_d = M^{-1}\left(-B\dot{\tilde{x}} - K\tilde{x} + f_{ext}\right)
+\ddot{\mathbf{x}}_d = \mathbf{M}^{-1} \left( -\mathbf{B}\dot{\tilde{\mathbf{x}}} -\mathbf{K}\tilde{\mathbf{x}} +\mathbf{f}_{ext} \right)
 $$
 
 $$
-\tilde{x} = x - x_d
+\tilde{\mathbf{x}} = \mathbf{x} - \mathbf{x_d}
 $$
 
 $$
-\dot{\tilde{x}} = \dot{x} - \dot{x}_d
+\dot{\tilde{\mathbf{x}}} = \dot{\mathbf{x}} - \dot{\mathbf{x}}_d
 $$
 
 - Obtener las aceleraciones deseadas articulares.
+
 $$
-\ddot{x} = J(q)\ddot{q} + \dot{J}(q,\dot{q})\dot{q}
+\ddot{\mathbf{x}} = \mathbf{J}(\mathbf{q})\ddot{\mathbf{q}} + \dot{\mathbf{J}}(\mathbf{q},\dot{\mathbf{q}})\dot{\mathbf{q}}
 $$
 
 $$
-\ddot{q} = J(q)^{-1} \left[ \ddot{x} - \dot{J}(q,\dot{q})\dot{q} \right]
+\ddot{\mathbf{q}} = \mathbf{J}(\mathbf{q})^{-1} \left[ \ddot{\mathbf{x}} - \dot{\mathbf{J}}(\mathbf{q},\dot{\mathbf{q}}) \dot{\mathbf{q}} \right]
 $$
 
 ## Aplicación práctica
