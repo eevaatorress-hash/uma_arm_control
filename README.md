@@ -33,7 +33,7 @@ donde
 
 - $\boldsymbol{\tau_{ext} \in \mathbb{R}^{n\times1}}$ es el vector de torques articulares provocados por fuerzas externas.
 
-En nuestro caso, al contar con dos grados de libertad, n = 2. Si se despeja las aceleraciones articulares de la ecuación anterior se obtiene:
+En nuestro caso, al contar con dos grados de libertad, n = 2. Si se despejan las aceleraciones articulares de la ecuación anterior se obtiene:
 
 $$
 \boldsymbol{\ddot{q} = M^{-1}(q)\left[\tau + \tau_{ext} - C(q,\dot{q})\dot{q} - F_b\dot{q} - g(q)\right]}
@@ -188,7 +188,7 @@ Eigen::VectorXd calculate_position()
 ~~~
 
 ## Resultados
-Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales: `ros2 launch uma_arm_description uma_arm_visualization.launch.py`, `ros2 launch uma_arm_control uma_arm_dynamics_launch.py`. Sin embargo, si además se quieren observar las fluctuaciones de posición, velocidad y aceleración articulares, hace falta grabar los experimentos y reproducirlos utilizando `ros2 bag record --all -o experiment3` y `plotjuggler`.
+Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales: `ros2 launch uma_arm_description uma_arm_visualization.launch.py`, `ros2 launch uma_arm_control uma_arm_dynamics_launch.py`. Sin embargo, si además se quieren observar las fluctuaciones de posición, velocidad y aceleración articulares, se pueden grabar los experimentos con `ros2 bag record --all -o experiment` y reproducirlos utilizando `ros2 bag play` y `plotjuggler`.
 
 ![Resultados del Lab2](/images/Resultados_Lab2.png)
 

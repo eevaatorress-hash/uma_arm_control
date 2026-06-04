@@ -125,7 +125,6 @@ private:
     // Method to calculate joint acceleration
     Eigen::VectorXd calculate_acceleration()
     {
-
         // Initialize M, C, Fb, g_vec, J, and tau_ext
         Eigen::MatrixXd M(2, 2);
         Eigen::VectorXd C(2);
@@ -149,11 +148,11 @@ private:
 
         // Calculate vector C (C is 2x1 because it already includes q_dot)
         C << -m2_ * l1_ * l2_ * sin(q2) * (2 * q_dot1 * q_dot2 + pow(q_dot2, 2)),
-        m2_ * l1_ * l2_ * pow(q_dot1, 2) * sin(q2);
+            m2_ * l1_ * l2_ * pow(q_dot1, 2) * sin(q2);
 
         // Calculate Fb matrix
         Fb << b1_, 0.0,
-        0.0, b2_;
+            0.0, b2_;
 
         // Calculate g_vect
         g_vec << (m1_ + m2_) * l1_ * g_ * cos(q1) + m2_ * g_ * l2_ * cos(q1 + q2),
@@ -173,25 +172,25 @@ private:
         return q_ddot;
     }
 
-        // Method to calculate joint velocity
-        Eigen::VectorXd calculate_velocity()
-        {
-            // Placeholder for velocity calculation
-            // Integrate velocity over the time step (elapsed_time_)
-            Eigen::VectorXd q_dot = joint_velocities_ + joint_accelerations_ * elapsed_time_;
+    // Method to calculate joint velocity
+    Eigen::VectorXd calculate_velocity()
+    {
+        // Placeholder for velocity calculation
+        // Integrate velocity over the time step (elapsed_time_)
+        Eigen::VectorXd q_dot = joint_velocities_ + joint_accelerations_ * elapsed_time_;
 
-            return q_dot; 
-        }
+        return q_dot;
+    }
 
-        // Method to calculate joint position
-        Eigen::VectorXd calculate_position()
-        {
-            // Placeholder for position calculation
-            // Integrate position over the time step (elapsed_time_)
-            Eigen::VectorXd q = joint_positions_ + joint_velocities_ * elapsed_time_;
+    // Method to calculate joint position
+    Eigen::VectorXd calculate_position()
+    {
+        // Placeholder for position calculation
+        // Integrate position over the time step (elapsed_time_)
+        Eigen::VectorXd q = joint_positions_ + joint_velocities_ * elapsed_time_;
 
-            return q;
-        }
+        return q;
+    }
 
     // Method to publish the joint data
     void publish_data()
