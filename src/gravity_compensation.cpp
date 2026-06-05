@@ -108,7 +108,7 @@
             g_vec << (m1_ + m2_) * l1_ * g_ * cos(q1) + m2_ * g_ * l2_ * cos(q1 + q2),
             m2_ * g_ * l2_ * cos(q1 + q2);
 
-            // // Calculate desired torque
+            // Calculate desired torque
             Eigen::VectorXd torque(2);
             torque = g_vec;
 

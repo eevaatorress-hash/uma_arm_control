@@ -1,5 +1,10 @@
 # uma_arm_control
-En este repositorio se estudiarán los resultados de Lab2, Lab3 y Lab4.
+En este repositorio se estudiarán los resultados de Lab2, Lab3 y Lab4 de la asignatura Ampliación de Robótica de la parte de manipualdores.
+Para reproducir los resultados, también es necesario hacer uso del paquete `uma_arm_description`, el cual puede obtenerse al lanzar este comando dentro de `your_ros2_ws/src`:
+
+~~~
+git clone https://github.com/jmgandarias/uma_arm_description.git
+~~~
 
 # Lab2
 En esta práctica se añadirán las ecuaciones dinámicas a la cadena cinemática de nuestro manipulador para poder observar su comportamiento. Será en Laboratorios posteriores cuando,  además de la dinámica natural del manipulador, se incorporarán controladores para contrarrestar dichos efectos.
@@ -208,11 +213,243 @@ Para entender más aún los efectos de los distintos elementos necesarios para l
 
 # Lab 3
 
-## Fundamento teórico
+En esta práctica se realizarán tres tareas. La primera consiste en compensación de la gravedad para permitir que el brazo permanezca en una pose fija sin caerse debido a la gravedad. En la segunda tarea se desarrolla un controlador que compensa toda la dinámica no lineal del manipulador usando un modelo inverso de la dinámica. La última tarea tiene como objetivo desarrollar un controlador PD en espacio articular con compensación de dinámica no lineal.
 
-## Aplicación práctica
+## Compensación de la gravedad
 
-## Resultados
+### Fundamento teórico
+
+Se realizará un controlador centralizado que generará en los motores un torque que compense el producido por la gravedad. Para ello, el torque será el siguiente:
+\cdot
+$$
+\boldsymbol{\tau=g(q)} = 
+\begin{bmatrix}
+(m_1+m_2) \cdot l_1 \cdot g \cdot \cos(q_1)+m_2 \cdot g \cdot l_2 \cdot \cos(q_1+q_2)
+\\
+m_2 \cdot g \cdot l_2 \cdot \cos(q_1+q_2)
+\end{bmatrix}
+$$
+
+### Aplicación práctica
+
+Se ha creado un nodo llamado `gravity_compensation.cpp` y su archivo launch correspondiente llamado `gravity_compensation_launch.py`. El código para obtener el torque deseado es el siguiente:
+~~~
+    // Method to calculate the desired joint torques
+    Eigen::VectorXd gravity_compensation()
+    {
+        // Placeholder for calculate the commanded torques
+        // Calculate the control torque to compensate only for gravity effects: tau = g(q)
+        Eigen::VectorXd g_vec(2);
+        double q1 = joint_positions_(0);
+        double q2 = joint_positions_(1);
+
+        // Calculate g_vect
+        g_vec << (m1_ + m2_) * l1_ * g_ * cos(q1) + m2_ * g_ * l2_ * cos(q1 + q2),
+        m2_ * g_ * l2_ * cos(q1 + q2);
+
+        // Calculate desired torque
+        Eigen::VectorXd torque(2);
+        torque = g_vec;
+
+       return torque;
+    }
+~~~
+
+### Resultados
+Para simular el comportamiento del brazo con un controlador que compensa la gravedad se lanzan estos 4 comandos, cada uno en una terminal diferente:  
+`ros2 launch uma_arm_description uma_arm_visualization.launch.py`  
+`ros2 launch uma_arm_control gravity_compensation_launch.py`  
+`ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
+`python3 wrench_trackbar_publisher.py`  
+Inicialmente se puede observar como el brazo se mantiene fijo en esta posición inicial:
+
+![Posición inicial del brazo](/images/gc_pose_inicial.png)
+
+Se le aplica una fuerza puntual positiva en el eje $x$ y luego en el eje $y$, obteniendo el siguiente comportamiento:
+
+![Gráfica de los resultados de compensación de la gravedad](/images/gc_grafica_movimiento.png)
+
+Se observa que las posiciones se mantienen constantes hasta la aplicación de una primera fuerza, momento en el que ambas articulaciones comienzan a presentar velocidad y aceleración. Al cesar la fuerza aplicada, la velocidad empieza a disminuir y la aceleración cambia de signo, ya que el sistema pasa de moverse a frenarse debido a las fuerzas viscosas del modelo. Una vez desaparece el efecto de la fuerza externa, el controlador desarrollado permite que el brazo mantenga una nueva posición estable. Este mismo proceso se repite al aplicar una segunda fuerza. Finalmente el brazo se queda fijo en esta posición:
+
+![Posición final del brazo](/images/gc_pose_final.png)
+
+En el caso de que los valores $m1$, $m2$, $l1$ o $l2$ sean incorrectos, la compensación deja de funcionar correctamente, ya que el controlador estima de forma errónea el par asociado a la gravedad. Por ejemplo, si alguno de estos valores es menor que el real, el par calculado por gravedad será inferior al real, por lo que el robot aplicará menos esfuerzo del necesario y terminará cediendo progresivamente hasta caer.
+
+![Simulación del comportamiento al disminuir m1, m2, l1, l2](/images/yamlreducido_gc.png)
+
+En el caso de aumentar estos valores, ocurre el efecto contrario, se cree que el par generado por la gravedad es mayor, por lo que aplica más esfuerzo del necesario y el brazo sube.
+
+![Simulación del comportamiento al aumentar m1, m2, l1, l2](/images/yamlaumentadas_gc.png)
+
+## Compensación de la dinámica
+
+### Fundamento teórico
+
+Para compensar la dinámica no lineal del manipulador, es necesario calcular la cancelación de dicha dinámica a partir de las aceleraciones articulares deseadas ($\boldsymbol{\ddot{q}}_d$) y del estado actual de las articulaciones ($\boldsymbol{q},\boldsymbol{\dot{q}}$). Se usará el siguiente controlador:
+
+![Controlador de compensación de la dinámica](/images/dc_esquema.png)
+
+Los pares articulares vienen dados por:
+
+$$
+\boldsymbol{\tau = M(q)\ddot{q}_d + n(q,\dot{q}) = M(q)\ddot{q}_d + C(q,\dot{q})\dot{q} + F_b\dot{q} + g(q)}
+$$
+
+Evaluando cada matriz de la misma forma que en el Lab 2:
+$$
+\boldsymbol{M(q)=
+\begin{bmatrix}
+m_1l_1^2 + m_2\left(l_1^2 + 2l_1l_2\cos(q_2) + l_2^2\right) &
+m_2\left(l_1l_2\cos(q_2)+l_2^2\right)
+\\
+m_2\left(l_1l_2\cos(q_2)+l_2^2\right) &
+m_2l_2^2
+\end{bmatrix}}
+$$
+
+$$
+\boldsymbol{C(q,\dot{q})\dot{q}=
+\begin{bmatrix}
+-m_2l_1l_2\sin(q_2)\left(2\dot{q}_1\dot{q}_2+\dot{q}_2^2\right)
+\\
+m_2l_1l_2\dot{q}_1^2\sin(q_2)
+\end{bmatrix}}
+$$
+
+$$
+\boldsymbol{F_b=
+\begin{bmatrix}
+b_1 & 0 \\
+0 & b_2
+\end{bmatrix}}
+$$
+
+$$
+\boldsymbol{g(q)=
+\begin{bmatrix}
+(m_1+m_2)l_1g\cos(q_1)+m_2gl_2\cos(q_1+q_2)
+\\
+m_2gl_2\cos(q_1+q_2)
+\end{bmatrix}}
+$$
+
+### Aplicación práctica
+
+Se ha creado un nodo llamado `dynamics_cancellation.cpp` y su archivo launch correspondiente llamado `dynamics_cancellation_launch.py`. El código para obtener el torque deseado es el siguiente:
+
+~~~
+// Method to calculate joint torques
+Eigen::VectorXd cancel_dynamics()
+{
+    // Initialize M, C, Fb, g_vec
+    Eigen::MatrixXd M(2, 2);
+    Eigen::VectorXd C(2);
+    Eigen::MatrixXd Fb(2, 2);
+    Eigen::VectorXd g_vec(2);
+
+    // Initialize q1, q2, q_dot1 and q_dot2
+    double q1 = joint_positions_(0);
+    double q2 = joint_positions_(1);
+    double q_dot1 = joint_velocities_(0);
+    double q_dot2 = joint_velocities_(1);
+
+    // Calculate matrix M
+    M(0, 0) = m1_ * pow(l1_, 2) + m2_ * (pow(l1_, 2) + 2 * l1_ * l2_ * cos(q2) + pow(l2_, 2));
+    M(0, 1) = m2_ * (l1_ * l2_ * cos(q2) + pow(l2_, 2));
+    M(1, 0) = M(0, 1);
+    M(1, 1) = m2_ * pow(l2_, 2);
+
+    // Calculate vector C (C is 2x1 because it already includes q_dot)
+    C << -m2_ * l1_ * l2_ * sin(q2) * (2 * q_dot1 * q_dot2 + pow(q_dot2, 2)),
+        m2_ * l1_ * l2_ * pow(q_dot1, 2) * sin(q2);
+
+    // Calculate Fb matrix
+    Fb << b1_, 0.0,
+        0.0, b2_;
+
+    // Calculate g_vec
+    g_vec << (m1_ + m2_) * l1_ * g_ * cos(q1) + m2_ * g_ * l2_ * cos(q1 + q2),
+        m2_ * g_ * l2_ * cos(q1 + q2);
+
+    // Calculate control torque using the dynamic model: torque = M * q_ddot + C  + Fb * q_dot + g
+    Eigen::VectorXd torque(2);
+    torque = M * desired_joint_accelerations_ + C + Fb * joint_velocities_ + g_vec;
+
+    return torque;
+}
+~~~
+
+### Resultados
+Para ver el comportamiento del brazo con un controlador que compensa la dinámica al mandar una trayectoria cúbica se lanzan estos 4 comandos, cada uno en una terminal diferente:  
+`ros2 launch uma_arm_description uma_arm_visualization.launch.py`  
+`ros2 launch uma_arm_control dynamics_cancellation_launch.py`  
+`ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
+`python3 cubic_trajectory.py`
+
+Obteniendo el sigueinte comportamiento:
+
+![Simulación de compensación de la dinámica](/images/dynamics_cancellation.png)
+
+La aceleración es lineal, la velocidad parabólica y la trayectoria cúbica tal y como se esperaba.
+
+Si alguno de los parámetros $m1$,  $m2$,  $l1$,  $l2$,  $b1$ o $b2$ es incluso ligeramente incorrecto, el sistema pierde estabilidad, llegando a ser incapaz de mantenerse en reposo en la misma posición. Esto ocurre porque la cancelación de dinámica depende de un modelo muy preciso, cualquier error provoca comportamientos muy inesperados al ser un sistema complejo y no lineal.
+
+## Controlador PD en espacio articular con compensación de dinámica no lineal
+
+### Fundamento teórico
+Una vez compensada la dinámica no lineal del manipulador mediante el controlador de dinámica inversa, es posible diseñar un controlador lineal para regular su posición articular. Para ello, se implementa un controlador PD en espacio articular que calcula las aceleraciones articulares deseadas a partir del error de posición y velocidad entre el estado actual del robot y una configuración de referencia. El esquema del nuevo controlador es el sigueinte:
+
+![Esquema de un controlador pd compensador de la dinámica](/images/pd_esquema.png)
+
+Donde:
+- $\boldsymbol{K}_P = diag\{ \omega ²_{n_1},...,  \omega ²_{n_n}\}$ es la matriz diagonal de ganancias proporcionales (`KP`).
+- $\boldsymbol{K}_D = diag\{ 2 \zeta _1 \omega ²_{n_1},..., 2 \zeta _n \omega ²_{n_n}\}$ es la matriz diagonal de ganancias derivativas (`KD`).
+- $\boldsymbol{y}$ es la aceleración deseada en un instante.
+
+Se establece $\boldsymbol{\dot{q}}_d = \boldsymbol{0}$, $\boldsymbol{\ddot{q}}_d = \boldsymbol{0}$ y $\boldsymbol{q}_d$ cualquier posición dentro del espacio articular. La aceleración y velocidad deseadas son nulas ya que una vez alcanzada la posición final, el brazo debe detenerse. De esta forma se obtiene al siguiente ecuación:
+
+$$
+\boldsymbol{y} = 
+\boldsymbol{K}_P (\boldsymbol{q}_d - \boldsymbol{q}) - \boldsymbol{K}_D \boldsymbol{\dot{q}} 
+$$
+
+### Aplicación práctica
+
+Se ha creado un nuevo nodo denominado `pd_controller.cpp`, en el que se implementa el control lineal estabilizante. En este nodo se definen las matrices $\boldsymbol{K}_P$ y $\boldsymbol{K}_D$, así como la posición articular deseada a la que se quiere alcanzar el sistema. El nodo se suscribe a las señales de posición y velocidad articular actuales, y a partir de esta información calcula y publica la aceleración articular deseada.
+
+~~~
+// Method to calculate desired joint acceleration
+Eigen::VectorXd compute_pd_acceleration()
+{
+    Eigen::Vector2d qddot_desired = - KD * joint_velocities_ + KP * ( q_ref  - joint_positions_);
+    return qddot_desired;
+}
+~~~
+
+Una vez publicada la aceleración, ésta es leída por el compensador de la dinámica permitiendo así que el robot alcance dicha posición. 
+
+Para obtener un movimiento con pocas oscilaciones, se toma $\zeta = 2$. Por otro lado, se selecciona una frecuencia natural $\omega_n = 1$ para poder visualizar el movimiento del robot.
+
+### Resultados
+Para ver el comportamiento del brazo con el controlador pd lineal se lanzan estos 4 comandos, cada uno en una terminal diferente:  
+`ros2 launch uma_arm_description uma_arm_visualization.launch.py`  
+`ros2 launch uma_arm_control dynamics_cancellation_launch.py`  
+`ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
+`ros2 run uma_arm_control pd_controller`
+
+Con los valores descirtos anteriormente y una posición de $[0.0, \ 3.14/2]$ se consigue el siguiente resultado:
+
+![Simulacion con control pd 1](/images/pd1.png)
+
+![Simulacion con control pd 1 grafica](/images/pd1_grafica.png)
+
+El manipulador alcanza de forma correcta la posición final con velocidad ya celeración nulas. En las posición se puede observar una pequeña sobreoscilación debida a la inercia. Si se quiere alcanzar la posición final de forma más rápida, se puede aumentar la frecuencia antural a $\omega_n = 15$ por ejemplo.
+
+![Simulacion con control pd 2 grafica](/images/pd2_grafica.png)
+
+En el caso de que se quiera un movimiento más suave y más controlado, se pueden establecer estos valores: $\omega_n = 0.5$ y $\zeta = 4$. De esta forma se obtiene un resultado sin sobreoscilación.
+
+![Simulacion con control pd 3 grafica](/images/pd3_grafica.png)
 
 # Lab 4
 En esta práctica se implementará en el paquete de `uma_arm_control`, el siguiente esquema del controlador de impedancia.
@@ -395,7 +632,12 @@ Eigen::VectorXd calculate_desired_joint_accelerations()
 Además de este controlador, se añadirá un nodo (`equilibrium_pose_publisher.py`) que nos permita cambiar la posición de equilibrio del manipulador.
 
 ## Resultados
-Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales: `ros2 launch uma_arm_description uma_arm_visualization.launch.py`, `ros2 launch uma_arm_control impedance_controller_launch.py`, `ros2 launch uma_arm_control dynamics_cancellation_external_forces_launch.py`, `ros2 launch uma_arm_control uma_arm_dynamics_launch.py` y `python3 wrench_trackbar_publisher.py`.
+Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales: 
+`ros2 launch uma_arm_description uma_arm_visualization.launch.py`
+`ros2 launch uma_arm_control impedance_controller_launch.py`
+`ros2 launch uma_arm_control dynamics_cancellation_external_forces_launch.py`
+`ros2 launch uma_arm_control uma_arm_dynamics_launch.py`
+`python3 wrench_trackbar_publisher.py`
 
 Mandando fuerzas externas sobre el eje y se obtiene:
 ![Respuesta del manipulador ante fuerzas externas sobre el eje y](/images/Respuesta_ejey.png)
