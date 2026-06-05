@@ -220,7 +220,7 @@ En esta práctica se realizarán tres tareas. La primera consiste en compensaci�
 ### Fundamento teórico
 
 Se realizará un controlador centralizado que generará en los motores un torque que compense el producido por la gravedad. Para ello, el torque será el siguiente:
-\cdot
+
 $$
 \boldsymbol{\tau=g(q)} = 
 \begin{bmatrix}
@@ -292,10 +292,11 @@ Para compensar la dinámica no lineal del manipulador, es necesario calcular la 
 Los pares articulares vienen dados por:
 
 $$
-\boldsymbol{\tau = M(q)\ddot{q}_d + n(q,\dot{q}) = M(q)\ddot{q}_d + C(q,\dot{q})\dot{q} + F_b\dot{q} + g(q)}
+\boldsymbol{\tau = M(q)\ddot{q}}_d + \boldsymbol{n(q,\dot{q}) = M(q)\ddot{q}}_d + \boldsymbol{C(q,\dot{q})\dot{q} + F_b\dot{q} + g(q)}
 $$
 
 Evaluando cada matriz de la misma forma que en el Lab 2:
+
 $$
 \boldsymbol{M(q)=
 \begin{bmatrix}
@@ -402,6 +403,7 @@ Una vez compensada la dinámica no lineal del manipulador mediante el controlado
 ![Esquema de un controlador pd compensador de la dinámica](/images/pd_esquema.png)
 
 Donde:
+
 - $\boldsymbol{K}_P = diag\{ \omega ²_{n_1},...,  \omega ²_{n_n}\}$ es la matriz diagonal de ganancias proporcionales (`KP`).
 - $\boldsymbol{K}_D = diag\{ 2 \zeta _1 \omega ²_{n_1},..., 2 \zeta _n \omega ²_{n_n}\}$ es la matriz diagonal de ganancias derivativas (`KD`).
 - $\boldsymbol{y}$ es la aceleración deseada en un instante.
