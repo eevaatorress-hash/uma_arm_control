@@ -277,57 +277,57 @@ Para simular el comportamiento del brazo con un controlador que compensa la grav
 `ros2 launch uma_arm_control gravity_compensation_launch.py`  
 `ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
 `python3 wrench_trackbar_publisher.py`  
-Inicialmente se puede observar como el brazo se mantiene fijo en la posición inicial mostrada en la figura 3.1.
+Inicialmente se puede observar como el brazo se mantiene fijo en la posición inicial mostrada en la figura 3.1.1.
 
 <p align="center">
     <img src="/images/gc_pose_inicial.png">
     <br>
-    <em>Figura 3.1: Posición inicial del brazo.</em>
+    <em>Figura 3.1.1: Posición inicial del brazo.</em>
 </p>
 
 
-Se le aplica una fuerza puntual positiva en el eje $x$ y luego en el eje $y$, obteniendo el comportamiento mostrado en la figura 3.2.
+Se le aplica una fuerza puntual positiva en el eje $x$ y luego en el eje $y$, obteniendo el comportamiento mostrado en la figura 3.1.2.
 
 <p align="center">
     <img src="/images/gc_grafica_movimiento.png">
     <br>
-    <em>Figura 3.2: Gráfica de los resultados de compensación de la gravedad.</em>
+    <em>Figura 3.1.2: Gráfica de los resultados de compensación de la gravedad.</em>
 </p>
 
-Se observa que las posiciones se mantienen constantes hasta la aplicación de una primera fuerza, momento en el que ambas articulaciones comienzan a presentar velocidad y aceleración. Al cesar la fuerza aplicada, la velocidad empieza a disminuir y la aceleración cambia de signo, ya que el sistema pasa de moverse a frenarse debido a las fuerzas viscosas del modelo. Una vez desaparece el efecto de la fuerza externa, el controlador desarrollado permite que el brazo mantenga una nueva posición estable. Este mismo proceso se repite al aplicar una segunda fuerza. Finalmente el brazo se queda fijo en la posición mostrada en la figura 3.3.
+Se observa que las posiciones se mantienen constantes hasta la aplicación de una primera fuerza, momento en el que ambas articulaciones comienzan a presentar velocidad y aceleración. Al cesar la fuerza aplicada, la velocidad empieza a disminuir y la aceleración cambia de signo, ya que el sistema pasa de moverse a frenarse debido a las fuerzas viscosas del modelo. Una vez desaparece el efecto de la fuerza externa, el controlador desarrollado permite que el brazo mantenga una nueva posición estable. Este mismo proceso se repite al aplicar una segunda fuerza. Finalmente el brazo se queda fijo en la posición mostrada en la figura 3.1.3.
 
 <p align="center">
     <img src="/images/gc_pose_final.png">
     <br>
-    <em>Figura 3.3: Posición final del brazo.</em>
+    <em>Figura 3.1.3: Posición final del brazo.</em>
 </p>
 
-En el caso de que los valores $m1$, $m2$, $l1$ o $l2$ sean incorrectos, la compensación deja de funcionar correctamente, ya que el controlador estima de forma errónea el par asociado a la gravedad. Por ejemplo, si alguno de estos valores es menor que el real, el par calculado por gravedad será inferior al real, por lo que el robot aplicará menos esfuerzo del necesario y terminará cediendo progresivamente hasta caer. Este efecto puede ser observado en la figura 3.4.
+En el caso de que los valores $m1$, $m2$, $l1$ o $l2$ sean incorrectos, la compensación deja de funcionar correctamente, ya que el controlador estima de forma errónea el par asociado a la gravedad. Por ejemplo, si alguno de estos valores es menor que el real, el par calculado por gravedad será inferior al real, por lo que el robot aplicará menos esfuerzo del necesario y terminará cediendo progresivamente hasta caer. Este efecto puede ser observado en la figura 3.1.4.
 
 <p align="center">
     <img src="/images/yamlreducido_gc.png">
     <br>
-    <em>Figura 3.4: Simulación del comportamiento al disminuir m1, m2, l1, l2.</em>
+    <em>Figura 3.1.4: Simulación del comportamiento al disminuir m1, m2, l1, l2.</em>
 </p>
 
-En el caso de aumentar estos valores, ocurre el efecto contrario, se cree que el par generado por la gravedad es mayor, por lo que aplica más esfuerzo del necesario y el brazo sube. Este efecto puede ser observado en la figura 3.5.
+En el caso de aumentar estos valores, ocurre el efecto contrario, se cree que el par generado por la gravedad es mayor, por lo que aplica más esfuerzo del necesario y el brazo sube. Este efecto puede ser observado en la figura 3.1.5.
 
 <p align="center">
     <img src="/images/yamlaumentadas_gc.png">
     <br>
-    <em>Figura 3.4: Simulación del comportamiento al aumentar m1, m2, l1, l2.</em>
+    <em>Figura 3.1.5: Simulación del comportamiento al aumentar m1, m2, l1, l2.</em>
 </p>
 
 ## Compensación de la dinámica
 
 ### Fundamento teórico
 
-Para compensar la dinámica no lineal del manipulador, es necesario calcular la cancelación de dicha dinámica a partir de las aceleraciones articulares deseadas ($\boldsymbol{\ddot{q}}_d$) y del estado actual de las articulaciones ($\boldsymbol{q},\boldsymbol{\dot{q}}$). Se usará el controlador de la figura 4.1.
+Para compensar la dinámica no lineal del manipulador, es necesario calcular la cancelación de dicha dinámica a partir de las aceleraciones articulares deseadas ($\boldsymbol{\ddot{q}}_d$) y del estado actual de las articulaciones ($\boldsymbol{q},\boldsymbol{\dot{q}}$). Se usará el controlador de la figura 3.2.1.
 
 <p align="center">
     <img src="/images/dc_esquema.png">
     <br>
-    <em>Figura 4.1: Controlador de compensación de la dinámica.</em>
+    <em>Figura 3.2.1: Controlador de compensación de la dinámica.</em>
 </p>
 
 Los pares articulares vienen dados por:
@@ -428,12 +428,12 @@ Para ver el comportamiento del brazo con un controlador que compensa la dinámic
 `ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
 `python3 cubic_trajectory.py`
 
-Se obtiene el comportamiento de la figura 4.2.
+Se obtiene el comportamiento de la figura 3.2.2.
 
 <p align="center">
     <img src="/images/dynamics_cancellation.png">
     <br>
-    <em>Figura 4.2: Simulación de compensación de la dinámica.</em>
+    <em>Figura 3.2.2: Simulación de compensación de la dinámica.</em>
 </p>
 
 La aceleración es lineal, la velocidad parabólica y la trayectoria cúbica tal y como se esperaba.
@@ -443,12 +443,12 @@ Si alguno de los parámetros $m1$,  $m2$,  $l1$,  $l2$,  $b1$ o $b2$ es incluso 
 ## Controlador PD en espacio articular con compensación de dinámica no lineal
 
 ### Fundamento teórico
-Una vez compensada la dinámica no lineal del manipulador mediante el controlador de dinámica inversa, es posible diseñar un controlador lineal para regular su posición articular. Para ello, se implementa un controlador PD en espacio articular que calcula las aceleraciones articulares deseadas a partir del error de posición y velocidad entre el estado actual del robot y una configuración de referencia. El esquema del nuevo controlador es el mostrado en la figura 5.1.
+Una vez compensada la dinámica no lineal del manipulador mediante el controlador de dinámica inversa, es posible diseñar un controlador lineal para regular su posición articular. Para ello, se implementa un controlador PD en espacio articular que calcula las aceleraciones articulares deseadas a partir del error de posición y velocidad entre el estado actual del robot y una configuración de referencia. El esquema del nuevo controlador es el mostrado en la figura 3.3.1.
 
 <p align="center">
     <img src="/images/pd_esquema.png">
     <br>
-    <em>Figura 5.1: Esquema de un controlador pd compensador de la dinámica.</em>
+    <em>Figura 3.3.1: Esquema de un controlador pd compensador de la dinámica.</em>
 </p>
 
 Donde:
@@ -488,43 +488,43 @@ Para ver el comportamiento del brazo con el controlador pd lineal se lanzan esto
 `ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
 `ros2 run uma_arm_control pd_controller`
 
-Con los valores descirtos anteriormente y una posición de $[0.0, \ 3.14/2]$ se consigue el siguiente resultado mostrado en las figuras 5.2 y 5.3.
+Con los valores descirtos anteriormente y una posición de $[0.0, \ 3.14/2]$ se consigue el siguiente resultado mostrado en las figuras 3.3.2 y 3.3.3.
 
 <p align="center">
     <img src="/images/pd1.png">
     <br>
-    <em>Figura 5.2: Simulacion con control pd 1.</em>
+    <em>Figura 3.3.2: Simulacion con control pd 1.</em>
 </p>
 
 <p align="center">
     <img src="/images/pd1_grafica.png">
     <br>
-    <em>Figura 5.3: Simulacion con control pd 1 grafica.</em>
+    <em>Figura 3.3.3: Simulacion con control pd 1 grafica.</em>
 </p>
 
-El manipulador alcanza de forma correcta la posición final con velocidad ya celeración nulas. En las posición se puede observar una pequeña sobreoscilación debida a la inercia. Si se quiere alcanzar la posición final de forma más rápida, se puede aumentar la frecuencia antural a $\omega_n = 15$ por ejemplo. Este efecto se puede observar en la figura 5.4.
+El manipulador alcanza de forma correcta la posición final con velocidad ya celeración nulas. En las posición se puede observar una pequeña sobreoscilación debida a la inercia. Si se quiere alcanzar la posición final de forma más rápida, se puede aumentar la frecuencia antural a $\omega_n = 15$ por ejemplo. Este efecto se puede observar en la figura 3.3.4.
 
 <p align="center">
     <img src="/images/pd2_grafica.png">
     <br>
-    <em>Figura 5.4: Simulacion con control pd 2 grafica.</em>
+    <em>Figura 3.3.4: Simulacion con control pd 2 grafica.</em>
 </p>
 
-En el caso de que se quiera un movimiento más suave y más controlado, se pueden establecer estos valores: $\omega_n = 0.5$ y $\zeta = 4$. De esta forma se obtiene un resultado sin sobreoscilación. Este efecto se puede observar en la figura 5.5.
+En el caso de que se quiera un movimiento más suave y más controlado, se pueden establecer estos valores: $\omega_n = 0.5$ y $\zeta = 4$. De esta forma se obtiene un resultado sin sobreoscilación. Este efecto se puede observar en la figura 3.3.5.
 
 <p align="center">
     <img src="/images/pd3_grafica.png">
     <br>
-    <em>Figura 5.5: Simulacion con control pd 3 grafica.</em>
+    <em>Figura 3.3.5: Simulacion con control pd 3 grafica.</em>
 </p>
 
 # Lab 4
-En esta práctica se implementará en el paquete de `uma_arm_control` el esquema del controlador de impedancia mostrado en la figura 6.1.
+En esta práctica se implementará en el paquete de `uma_arm_control` el esquema del controlador de impedancia mostrado en la figura 4.1.
 
 <p align="center">
     <img src="/images/Esquema_modelo.png">
     <br>
-    <em>Figura 6.1: Esquema modelo con controlador de impedancia.</em>
+    <em>Figura 4.1: Esquema modelo con controlador de impedancia.</em>
 </p>
 
 ## Fundamento teórico
@@ -710,62 +710,62 @@ Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en 
 `ros2 launch uma_arm_control uma_arm_dynamics_launch.py`
 `python3 wrench_trackbar_publisher.py`
 
-Mandando fuerzas externas sobre el eje y, se obtiene la figura 6.2.
+Mandando fuerzas externas sobre el eje y, se obtiene la figura 4.2.
 
 <p align="center">
     <img src="/images/Respuesta_ejey.png">
     <br>
-    <em>Figura 6.2: Respuesta del manipulador ante fuerzas externas sobre el eje y.</em>
+    <em>Figura 4.2: Respuesta del manipulador ante fuerzas externas sobre el eje y.</em>
 </p>
 
 Si se aumentasen los valores de las matrices utilizadas para esta práctica, utilizando el mismo experimento con el que se obtuvo la figura anterior, se alcanzan los siguientes resultados:
 
-- Cambios sobre la matriz de masas (M). Presenta una respuesta más lenta ante fuerzas externas, ya que para la misma fuerza se generan aceleraciones menores. Este efecto se puede observar en la figura 6.3.
+- Cambios sobre la matriz de masas (M). Presenta una respuesta más lenta ante fuerzas externas, ya que para la misma fuerza se generan aceleraciones menores. Este efecto se puede observar en la figura 4.3.
 
 <p align="center">
     <img src="/images/Respuesta_cambioM.png">
     <br>
-    <em>Figura 6.3: Respuesta del manipulador ante cambios en M.</em>
+    <em>Figura 4.3: Respuesta del manipulador ante cambios en M.</em>
 </p>
 
-- Cambios sobre la matriz de coeficientes de fricción viscosa (B). Incrementa la disipación de energía del sistema, reduciendo oscilaciones y mejorando la estabilidad. Este efecto se puede observar en la figura 6.4.
+- Cambios sobre la matriz de coeficientes de fricción viscosa (B). Incrementa la disipación de energía del sistema, reduciendo oscilaciones y mejorando la estabilidad. Este efecto se puede observar en la figura 4.4.
 
 <p align="center">
     <img src="/images/Respuesta_cambioB.png">
     <br>
-    <em>Figura 6.4: Respuesta del manipulador ante cambios en B.</em>
+    <em>Figura 4.4: Respuesta del manipulador ante cambios en B.</em>
 </p>
 
-- Cambios sobre la matriz de rigidez (K). El robot se resiste más al desplazamiento respecto a su podición de equilibrio. Este efecto se puede observar en la figura 6.5.
+- Cambios sobre la matriz de rigidez (K). El robot se resiste más al desplazamiento respecto a su podición de equilibrio. Este efecto se puede observar en la figura 4.5.
 
 <p align="center">
     <img src="/images/Respuesta_cambioK.png">
     <br>
-    <em>Figura 6.5: Respuesta del manipulador ante cambios en K.</em>
+    <em>Figura 4.5: Respuesta del manipulador ante cambios en K.</em>
 </p>
 
 Se puede concluir que, si en el eje X la impedancia fuese grande, el movimiento  sería más rígido, preciso y resistente a perturbaciones en esa dirección. Por el contrario, si en el eje Y la impedancia fuese pequeña, el comportamiento en esa dirección sería más flexible y fácil de perturbar permitiendo mayores desplazamientos ante la aplicación de fuerzas externas.
 
-No obstante, la aplicación de fuerzas en un eje no produce efectos solo en el, sino que también perturba al otro como se observa en la siguiente figura. Esto se debe a la transformación entre cartesiano y articular mediante a los jacobianos no preserva la independencia entre los ejes cartesianos, cada articulación contribuye simultáneamente a ambos ejes. Para evitar estas secuelas se podrían aumentar los coeficientes de fricción y de rígidez para intentar que el robot resista mejor a movimientos indeseados. Este efecto se puede observar en la figura 6.6.
+No obstante, la aplicación de fuerzas en un eje no produce efectos solo en el, sino que también perturba al otro como se observa en la siguiente figura. Esto se debe a la transformación entre cartesiano y articular mediante a los jacobianos no preserva la independencia entre los ejes cartesianos, cada articulación contribuye simultáneamente a ambos ejes. Para evitar estas secuelas se podrían aumentar los coeficientes de fricción y de rígidez para intentar que el robot resista mejor a movimientos indeseados. Este efecto se puede observar en la figura 4.6.
 
 <p align="center">
     <img src="/images/Fuerza_x_y.png">
     <br>
-    <em>Figura 6.6: Respuesta del manipulador ante esfuerzos en X e Y.</em>
+    <em>Figura 4.6: Respuesta del manipulador ante esfuerzos en X e Y.</em>
 </p>
 
 Por último, se observan los efectos de cambios en la posición de equilibrio. Para poder modificar esta posición se lanza la siguiente terminal `python3 equilibrium_pose_publisher.py`.
 
-Ante cambios pequeños en la posición de equilibrio, el robot se aproximará a la nueva posición sin problema. Sin embargo, si cambiamos esta posición a regiones fuera de la zona de trabajo del robot este dejará de responder. Este efecto se puede observar en las figuras 6.7 y 6.8.
+Ante cambios pequeños en la posición de equilibrio, el robot se aproximará a la nueva posición sin problema. Sin embargo, si cambiamos esta posición a regiones fuera de la zona de trabajo del robot este dejará de responder. Este efecto se puede observar en las figuras 4.7 y 4.8.
 
 <p align="center">
     <img src="/images/Equilibrio.png">
     <br>
-    <em>Figura 6.7: Respuesta del manipulador ante cambios en posición de equilibrio.</em>
+    <em>Figura 4.7: Respuesta del manipulador ante cambios en posición de equilibrio.</em>
 </p>
 
 <p align="center">
     <img src="/images/Equilibrio2.png">
     <br>
-    <em>Figura 6.8: Respuesta del manipulador ante cambios en posición de equilibrio.</em>
+    <em>Figura 4.8: Respuesta del manipulador ante cambios en posición de equilibrio.</em>
 </p>
