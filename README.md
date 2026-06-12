@@ -453,8 +453,6 @@ Una vez compensada la dinámica no lineal del manipulador mediante el controlado
 
 Donde:
 
-- $\boldsymbol{q \in \mathbb{R}^{n\times1}}$ es el vector de las posiciones articulares (`joint_positions_`).
-
 - $\boldsymbol{K}_P = diag\\{ \omega^2 _{n_1},...,  \omega^2 _{n_n}\\}$ es la matriz diagonal de ganancias proporcionales (`KP`).
   
 - $\boldsymbol{K}_D = diag\\{ 2 \zeta _1 \omega^2 _{n_1},..., 2 \zeta _n \omega^2 _{n_n}\\}$ es la matriz diagonal de ganancias derivativas (`KD`).
