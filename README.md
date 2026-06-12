@@ -453,8 +453,12 @@ Una vez compensada la dinámica no lineal del manipulador mediante el controlado
 
 Donde:
 
-- $\boldsymbol{K}_P = diag\{ \omega ²_{n_1},...,  \omega ²_{n_n}\}$ es la matriz diagonal de ganancias proporcionales (`KP`).
-- $\boldsymbol{K}_D = diag\{ 2 \zeta _1 \omega ²_{n_1},..., 2 \zeta _n \omega ²_{n_n}\}$ es la matriz diagonal de ganancias derivativas (`KD`).
+- $\boldsymbol{q \in \mathbb{R}^{n\times1}}$ es el vector de las posiciones articulares (`joint_positions_`).
+
+- $\boldsymbol{K}_P = diag\\{ \omega^2 _{n_1},...,  \omega^2 _{n_n}\\}$ es la matriz diagonal de ganancias proporcionales (`KP`).
+  
+- $\boldsymbol{K}_D = diag\\{ 2 \zeta _1 \omega^2 _{n_1},..., 2 \zeta _n \omega^2 _{n_n}\\}$ es la matriz diagonal de ganancias derivativas (`KD`).
+  
 - $\boldsymbol{y}$ es la aceleración deseada en un instante.
 
 Se establece $\boldsymbol{\dot{q}}_d = \boldsymbol{0}$, $\boldsymbol{\ddot{q}}_d = \boldsymbol{0}$ y $\boldsymbol{q}_d$ cualquier posición dentro del espacio articular. La aceleración y velocidad deseadas son nulas ya que una vez alcanzada la posición final, el brazo debe detenerse. De esta forma se obtiene al siguiente ecuación:
