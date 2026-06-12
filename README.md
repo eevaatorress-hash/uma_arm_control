@@ -502,7 +502,7 @@ Con los valores descirtos anteriormente y una posición de $[0.0, \ 3.14/2]$ se 
     <em>Figura 3.3.3: Simulacion con control pd 1 grafica.</em>
 </p>
 
-El manipulador alcanza de forma correcta la posición final con velocidad ya celeración nulas. En las posición se puede observar una pequeña sobreoscilación debida a la inercia. Si se quiere alcanzar la posición final de forma más rápida, se puede aumentar la frecuencia antural a $\omega_n = 15$ por ejemplo. Este efecto se puede observar en la figura 3.3.4.
+El manipulador alcanza de forma correcta la posición final con velocidad y aceleración nulas. En las posición se puede observar una pequeña sobreoscilación debida a la inercia. Si se quiere alcanzar la posición final de forma más rápida, se puede aumentar la frecuencia natural a $\omega_n = 15$ por ejemplo. Este efecto se puede observar en la figura 3.3.4.
 
 <p align="center">
     <img src="/images/pd2_grafica.png">
@@ -529,7 +529,7 @@ En esta práctica se implementará en el paquete de `uma_arm_control` el esquema
 
 ## Fundamento teórico
 Este controlador permite al manipulador ajustar su fuerza y movimiento al interactuar con el entorno en vez de mantener una posición rígida.
-Como tal la compensación a nivel articular la realiza el nodo diseñado en el laboratorio anterior, `dynamics_cancellation`, por eso en este nodo se pasarán esas variables del espacio operacional al cartesiano.
+Como tal la compensación a nivel articular la realiza el nodo diseñado en el laboratorio anterior, `dynamics_cancellation`, por eso en este nodo se pasarán esas variables del espacio articular al cartesiano.
 
 Se irán realizando los siguientes procedimientos:
 - Obtener la posición cartesiana a partir de la articular.
