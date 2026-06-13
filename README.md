@@ -1,5 +1,5 @@
 # uma_arm_control
-En este repositorio se estudiarán los resultados de Lab2, Lab3 y Lab4 de la asignatura Ampliación de Robótica de la parte de manipualdores.
+En este repositorio se estudiarán los resultados de Lab2, Lab3 y Lab4 de la asignatura Ampliación de Robótica de la parte de manipuladores.
 Para reproducir los resultados, también es necesario hacer uso del paquete `uma_arm_description`, el cual puede obtenerse al lanzar este comando dentro de `your_ros2_ws/src`:
 
 ~~~
@@ -504,7 +504,7 @@ Con los valores descirtos anteriormente y una posición de $[0.0, \ 3.14/2]$ se 
     <em>Figura 3.3.3: Simulacion con control pd 1 grafica.</em>
 </p>
 
-El manipulador alcanza de forma correcta la posición final con velocidad y aceleración nulas. En las posición se puede observar una pequeña sobreoscilación debida a la inercia. Si se quiere alcanzar la posición final de forma más rápida, se puede aumentar la frecuencia natural a $\omega_n = 15$ por ejemplo. Este efecto se puede observar en la figura 3.3.4.
+El manipulador alcanza de forma correcta la posición final con velocidad y aceleración nulas. En la posición se puede observar una pequeña sobreoscilación debida a la inercia. Si se quiere alcanzar la posición final de forma más rápida, se puede aumentar la frecuencia natural a $\omega_n = 15$ por ejemplo. Este efecto se puede observar en la figura 3.3.4.
 
 <p align="center">
     <img src="/images/pd2_grafica.png">
@@ -684,7 +684,7 @@ Eigen::VectorXd impedance_controller()
         }
 ~~~
 
-- Para las aceleraciones deseadas articulares, 
+- Para las aceleraciones deseadas articulares. 
 ~~~
 Eigen::VectorXd calculate_desired_joint_accelerations()
     {
