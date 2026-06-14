@@ -193,7 +193,10 @@ Eigen::VectorXd calculate_position()
 ~~~
 
 ## Resultados
-Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales: `ros2 launch uma_arm_description uma_arm_visualization.launch.py`, `ros2 launch uma_arm_control uma_arm_dynamics_launch.py`. Sin embargo, si además se quieren observar las fluctuaciones de posición, velocidad y aceleración articulares, se pueden grabar los experimentos con `ros2 bag record --all -o experiment` y reproducirlos utilizando `ros2 bag play` y `plotjuggler`. El resultado es el de la figura 2.1.
+Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales:  
+`ros2 launch uma_arm_description uma_arm_visualization.launch.py`  
+`ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
+Sin embargo, si además se quieren observar las fluctuaciones de posición, velocidad y aceleración articulares, se pueden grabar los experimentos con `ros2 bag record --all -o experiment` y reproducirlos utilizando `ros2 bag play` y `plotjuggler`. El resultado es el de la figura 2.1.
 
 <p align="center">
     <img src="/images/Resultados_Lab2.png">
@@ -705,12 +708,12 @@ Eigen::VectorXd calculate_desired_joint_accelerations()
 Además de este controlador, se añadirá un nodo (`equilibrium_pose_publisher.py`) que nos permita cambiar la posición de equilibrio del manipulador.
 
 ## Resultados
-Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales: 
-`ros2 launch uma_arm_description uma_arm_visualization.launch.py`
-`ros2 launch uma_arm_control impedance_controller_launch.py`
-`ros2 launch uma_arm_control dynamics_cancellation_external_forces_launch.py`
-`ros2 launch uma_arm_control uma_arm_dynamics_launch.py`
-`python3 wrench_trackbar_publisher.py`
+Los resultados del laboratorio se obtienen al lanzar los siguientes comandos en diferentes terminales:   
+`ros2 launch uma_arm_description uma_arm_visualization.launch.py`  
+`ros2 launch uma_arm_control impedance_controller_launch.py`  
+`ros2 launch uma_arm_control dynamics_cancellation_external_forces_launch.py`  
+`ros2 launch uma_arm_control uma_arm_dynamics_launch.py`  
+`python3 wrench_trackbar_publisher.py`  
 
 Mandando fuerzas externas sobre el eje y, se obtiene la figura 4.2.
 
@@ -722,33 +725,33 @@ Mandando fuerzas externas sobre el eje y, se obtiene la figura 4.2.
 
 Si se aumentasen los valores de las matrices utilizadas para esta práctica, utilizando el mismo experimento con el que se obtuvo la figura anterior, se alcanzan los siguientes resultados:
 
-- Cambios sobre la matriz de masas (M). Presenta una respuesta más lenta ante fuerzas externas, ya que para la misma fuerza se generan aceleraciones menores. Este efecto se puede observar en la figura 4.3.
+- Aumento de la matriz de masas (M). Presenta una respuesta más lenta ante fuerzas externas, ya que para la misma fuerza se generan aceleraciones menores. Este efecto se puede observar en la figura 4.3.
 
 <p align="center">
     <img src="/images/Respuesta_cambioM.png">
     <br>
-    <em>Figura 4.3: Respuesta del manipulador ante cambios en M.</em>
+    <em>Figura 4.3: Respuesta del manipulador ante aumentos en M.</em>
 </p>
 
-- Cambios sobre la matriz de coeficientes de fricción viscosa (B). Incrementa la disipación de energía del sistema, reduciendo oscilaciones y mejorando la estabilidad. Este efecto se puede observar en la figura 4.4.
+- Aumento de la matriz de coeficientes de fricción viscosa (B). Incrementa la disipación de energía del sistema, reduciendo oscilaciones y mejorando la estabilidad. Este efecto se puede observar en la figura 4.4.
 
 <p align="center">
     <img src="/images/Respuesta_cambioB.png">
     <br>
-    <em>Figura 4.4: Respuesta del manipulador ante cambios en B.</em>
+    <em>Figura 4.4: Respuesta del manipulador ante aumentos en B.</em>
 </p>
 
-- Cambios sobre la matriz de rigidez (K). El robot se resiste más al desplazamiento respecto a su podición de equilibrio. Este efecto se puede observar en la figura 4.5.
+- Aumento de la matriz de rigidez (K). El robot se resiste más al desplazamiento respecto a su posición de equilibrio. Este efecto se puede observar en la figura 4.5.
 
 <p align="center">
     <img src="/images/Respuesta_cambioK.png">
     <br>
-    <em>Figura 4.5: Respuesta del manipulador ante cambios en K.</em>
+    <em>Figura 4.5: Respuesta del manipulador ante aumentos en K.</em>
 </p>
 
 Se puede concluir que, si en el eje X la impedancia fuese grande, el movimiento  sería más rígido, preciso y resistente a perturbaciones en esa dirección. Por el contrario, si en el eje Y la impedancia fuese pequeña, el comportamiento en esa dirección sería más flexible y fácil de perturbar permitiendo mayores desplazamientos ante la aplicación de fuerzas externas.
 
-No obstante, la aplicación de fuerzas en un eje no produce efectos solo en el, sino que también perturba al otro como se observa en la siguiente figura. Esto se debe a la transformación entre cartesiano y articular mediante a los jacobianos no preserva la independencia entre los ejes cartesianos, cada articulación contribuye simultáneamente a ambos ejes. Para evitar estas secuelas se podrían aumentar los coeficientes de fricción y de rígidez para intentar que el robot resista mejor a movimientos indeseados. Este efecto se puede observar en la figura 4.6.
+No obstante, la aplicación de fuerzas en un eje no produce efectos solo en el, sino que también perturba al otro como se observa en la siguiente figura 4.6. Esto se debe a que la transformación entre los espacios cartesiano y articular mediante los jacobianos no preserva la independencia entre los ejes cartesianos, ya que cada articulación contribuye simultáneamente al movimiento de ambos ejes. Para evitar estas secuelas se podrían aumentar los coeficientes de fricción y de rígidez para intentar que el robot resista mejor a movimientos indeseados.
 
 <p align="center">
     <img src="/images/Fuerza_x_y.png">
@@ -756,9 +759,9 @@ No obstante, la aplicación de fuerzas en un eje no produce efectos solo en el, 
     <em>Figura 4.6: Respuesta del manipulador ante esfuerzos en X e Y.</em>
 </p>
 
-Por último, se observan los efectos de cambios en la posición de equilibrio. Para poder modificar esta posición se lanza la siguiente terminal `python3 equilibrium_pose_publisher.py`.
+Por último, se observan los efectos de cambios en la posición de equilibrio. Para poder modificar esta posición se lanza el siguiente código en una nueva terminal `python3 equilibrium_pose_publisher.py`.
 
-Ante cambios pequeños en la posición de equilibrio, el robot se aproximará a la nueva posición sin problema. Sin embargo, si cambiamos esta posición a regiones fuera de la zona de trabajo del robot este dejará de responder. Este efecto se puede observar en las figuras 4.7 y 4.8.
+Ante cambios pequeños en la posición de equilibrio, el robot se aproximará a la nueva posición sin problema. Sin embargo, si cambiamos esta posición a regiones fuera de la zona de trabajo del robot, este dejará de responder. Este efecto se puede observar en las figuras 4.7 y 4.8.
 
 <p align="center">
     <img src="/images/Equilibrio.png">
